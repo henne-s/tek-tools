@@ -20,17 +20,17 @@ H. Soehnholz
 Initial version: 2014-04-25
 """
 
-import numpy as np
 import struct
+import numpy as np
 
 
-def load(filename, wordvalues = False, signed = False):
+def load(filename, wordvalues=False, signed=False):
     """Read data from binary Tek oscilloscope file"""
 
     # open file and read data
-    f = open(filename, 'rb') # read binary
-    buf = f.read()
-    f.close()
+    datafile = open(filename, 'rb')  # read binary
+    buf = datafile.read()
+    datafile.close()
 
 #    print len(buf)
 
@@ -38,25 +38,25 @@ def load(filename, wordvalues = False, signed = False):
     i = 0
     for i in range(len(buf)):
         data = struct.unpack_from('B', buf, i)
-        if (data[0] == ord('#')):
+        if data[0] == ord('#'):
             break
 
     # get number of data points
     i += 1
     data = struct.unpack_from('c', buf, i)
-    nbytes = int(data[0]) # number of bytes for specifying data set size
+    nbytes = int(data[0])  # number of bytes for specifying data set size
 
     i += 1
     data = struct.unpack_from('c' * nbytes, buf, i)
     npoints = int(''.join(data))
 #    print "npoints = ", npoints
 
-    if (wordvalues):
+    if wordvalues:
         # read 16-bit data
-        
+
         i += nbytes
 
-        if (signed):
+        if signed:
             data = struct.unpack_from('>' + 'h' * (npoints / 2), buf, i)
             data_final = np.array(data) >> 8
         else:
@@ -65,20 +65,20 @@ def load(filename, wordvalues = False, signed = False):
 
     else:
         # read 8-bit data (default)
-        
+
         i += nbytes
 
-        if (signed):
+        if signed:
             data = struct.unpack_from('b' * npoints, buf, i)
             data_final = np.array(data)
         else:
             data = struct.unpack_from('B' * npoints, buf, i)
             data_final = np.array(data)
-        
+
     i += npoints
     endbyte = struct.unpack_from('c', buf, i)
-    if (ord(endbyte[0]) != 0x0a):
-        print "Error: number of data points doesn't match file size!"
+    if ord(endbyte[0]) != 0x0a:
+        print("Error: number of data points doesn't match file size!")
         return -1
 
     return data_final
