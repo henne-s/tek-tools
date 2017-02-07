@@ -48,7 +48,10 @@ def load(filename, wordvalues=False, signed=False):
 
     i += 1
     data = struct.unpack_from('c' * nbytes, buf, i)
-    npoints = int(''.join(data))
+    npoints_string = ''
+    for j in range(len(data)):
+        npoints_string += data[j].decode()
+    npoints = int(npoints_string)
 #    print "npoints = ", npoints
 
     if wordvalues:
